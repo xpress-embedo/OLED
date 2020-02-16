@@ -221,6 +221,12 @@ static uint8_t height( void );
 static void swap_num( uint16_t *a, uint16_t *b );
 
 /* Public Function Definition */
+
+/**
+ * @brief OLED_Init
+ *
+ * Initialize OLED
+ */
 void OLED_Init( void )
 {
   I2C_Init(I2C_STANDARD_SPEED);
@@ -272,16 +278,33 @@ void OLED_Init( void )
   OLED_Update();
 }
 
+/**
+ * @brief OLED_Width
+ *
+ * Get the OLED Width
+ * @return Oled Width
+ */
 uint8_t OLED_Width( void )
 {
   return width();
 }
 
+/**
+ * @brief OLED_Height
+ *
+ * Get the OLED Height
+ * @return Oled Height
+ */
 uint8_t OLED_Height( void )
 {
   return height();
 }
 
+/**
+ * @brief OLED_SetFont
+ *
+ * @param font: Select this font
+ */
 void OLED_SetFont( const uint8_t *font)
 {
   cfont.font = font;
@@ -292,6 +315,11 @@ void OLED_SetFont( const uint8_t *font)
   cfont.inverted = FALSE;
 }
 
+/**
+ * @brief OLED_InvertFont
+ *
+ * Invert the font
+ */
 void OLED_InvertFont( uint8_t invert_status )
 {
   if( invert_status )
@@ -304,6 +332,11 @@ void OLED_InvertFont( uint8_t invert_status )
   }
 }
 
+/**
+ * @brief OLED_Update
+ *
+ * Update the OLED Buffer on the actual display
+ */
 void OLED_Update( void )
 {
   uint16_t i = 0;
@@ -340,22 +373,44 @@ void OLED_Update( void )
   }
 }
 
+/**
+ * @brief OLED_SetContrast.
+ *
+ * Set the OLED display contrast.
+ * @param contrast: contrast value
+ */
 void OLED_SetContrast( uint8_t contrast )
 {
   ssd1306_command( SSD1306_SET_CONTRAST_CONTROL );
   ssd1306_command(contrast);
 }
 
+/**
+ * @brief OLED_DrawPixel.
+ *
+ * Clear the OLED Buffer.
+ */
 void OLED_ClearDisplay( void )
 {
   memset(buffer, 0, (SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8));
 }
 
+/**
+ * @brief OLED_FillDisplay.
+ *
+ * Fill the OLED Buffer.
+ */
 void OLED_FillDisplay( void )
 {
   memset(buffer, 0xFF, (SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8));
 }
 
+/**
+ * @brief OLED_InvertDisplay.
+ *
+ * Invert the Display based on the parameters
+ * @param value: If True invert the display
+ */
 void OLED_InvertDisplay( uint8_t value )
 {
   if( value )
@@ -368,10 +423,17 @@ void OLED_InvertDisplay( uint8_t value )
   }
 }
 
-void OLED_DrawPixel( uint16_t x, uint16_t y, uint8_t color)
+/**
+ * @brief OLED_DrawPixel.
+ *
+ * Draws a pixel on OLED by using the specified parameters.
+ * @param x: x coordinate with valid values: 0..127
+ * @param y: y coordinate with valid values: 0..63
+ * @param color: color parameter. Valid values: 0 and 1
+ */
+void OLED_DrawPixel( int16_t x, int16_t y, uint8_t color)
 {
-  // if ( (x < 0) || (x >= width()) || (y < 0) || (y >= height()))
-  if ( (x >= width()) || (y >= height()))
+  if ( (x < 0) || (x >= width()) || (y < 0) || (y >= height()))
     return;
 
   switch (color)
@@ -397,7 +459,7 @@ void OLED_DrawPixel( uint16_t x, uint16_t y, uint8_t color)
  * @param y_end: y coordinate of end point. Valid values: 0..63
  * @param color: color parameter. Valid values: 0 and 1
  */
-void OLED_Line( int8_t x_start, int8_t y_start, int8_t x_end, int8_t y_end, uint8_t color)
+void OLED_Line( int16_t x_start, int16_t y_start, int16_t x_end, int16_t y_end, uint8_t color)
 {
   int16_t x, y, addx, addy, dx, dy;
   int32_t P;
@@ -458,58 +520,7 @@ void OLED_Line( int8_t x_start, int8_t y_start, int8_t x_end, int8_t y_end, uint
     }
   }
 }
-/*
-void OLED_DrawLine(int8_t x0, int8_t y0, int8_t x1, int8_t y1, uint8_t color)
-{
-  int16_t dx, dy;
-  int16_t err;
-  int16_t ystep;
-  int16_t steep = abs(y1 - y0) > abs(x1 - x0);
-  if (steep)
-  {
-    swap_num(&x0, &y0);
-    swap_num(&x1, &y1);
-  }
 
-  if (x0 > x1)
-  {
-    swap_num(&x0, &x1);
-    swap_num(&y0, &y1);
-  }
-
-  dx = x1 - x0;
-  dy = abs(y1 - y0);
-
-  err = dx / 2;
-
-  if (y0 < y1)
-  {
-    ystep = 1;
-  }
-  else
-  {
-    ystep = -1;
-  }
-
-  for (; x0<=x1; x0++)
-  {
-    if (steep)
-    {
-      OLED_DrawPixel(y0, x0, color);
-    }
-    else
-    {
-      OLED_DrawPixel(x0, y0, color);
-    }
-    err -= dy;
-    if (err < 0)
-    {
-      y0 += ystep;
-      err += dx;
-    }
-  }
-}
-*/
 
 /**
  * @brief OLED Vertical Line.
@@ -522,9 +533,9 @@ void OLED_DrawLine(int8_t x0, int8_t y0, int8_t x1, int8_t y1, uint8_t color)
  * @param x_pos: x position. Valid values: 0..127
  * @param color: color parameter. Valid values: 0 and 1
  */
-void OLED_V_Line ( uint8_t y_start, uint8_t y_end, uint8_t x_pos, uint8_t color)
+void OLED_V_Line ( int16_t y_start, int16_t y_end, int16_t x_pos, uint8_t color)
 {
-  uint8_t temp;
+  int16_t temp;
   if( y_start > y_end )
   {
     temp = y_start;
@@ -550,9 +561,9 @@ void OLED_V_Line ( uint8_t y_start, uint8_t y_end, uint8_t x_pos, uint8_t color)
  * @param y_pos: x position. Valid values: 0..63
  * @param color: color parameter. Valid values: 0 and 1
  */
-void OLED_H_Line( uint8_t x_start, uint8_t x_end, uint8_t y_pos, uint8_t color)
+void OLED_H_Line( int16_t x_start, int16_t x_end, int16_t y_pos, uint8_t color)
 {
-  uint8_t temp;
+  int16_t temp;
   if( x_start > x_end )
   {
     temp = x_start;
@@ -582,7 +593,7 @@ void OLED_H_Line( uint8_t x_start, uint8_t x_end, uint8_t y_pos, uint8_t color)
  * Valid values: 0..63
  * @param color: color parameter. Valid values: 0 and 1
  */
-void OLED_Rectangle( uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t color)
+void OLED_Rectangle( int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color)
 {
   /*
   x1,y1 Upper Left
@@ -594,17 +605,40 @@ void OLED_Rectangle( uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t col
   OLED_V_Line(y1, y2, x2, color);
 }
 
-void OLED_FillRectangle( uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t color)
+/**
+ * @brief OLED_FillRectangle
+ *
+ * Draws a rectangle on OLED by using the specified parameters with filling.
+ *
+ * @param x1: x coordinate of the upper left rectangle corner. Valid values: 0..127
+ * @param y1: y coordinate of the upper left rectangle corner. Valid values: 0..63
+ * @param x2: x coordinate of the lower right rectangle corner. Valid values: 0..127
+ * @param y2: y coordinate of the lower right rectangle corner. Valid values: 0..63
+ * @param color: color parameter. Valid values: 0 and 1
+ */
+void OLED_FillRectangle( int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color)
 {
-  uint8_t i;
+  int16_t i;
   for( i=x1; i<=x2; i++ )
   {
     OLED_V_Line(y1, y2, i, color );
   }
 }
 
-// Draw a triangle
-void OLED_Triangle(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t color)
+/**
+ * @brief OLED_Triangle
+ *
+ * Draw a Triangle based on the coordinates
+ *
+ * @param x0: x0 coordinate
+ * @param y0: y0 coordinate
+ * @param x1: x1 coordinate
+ * @param y1: y1 coordinate
+ * @param x2: x2 coordinate
+ * @param y2: y2 coordinate
+ * @param color: color parameter. Valid values: 0 and 1
+ */
+void OLED_Triangle( int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color)
 {
   OLED_Line(x0, y0, x1, y1, color);
   OLED_Line(x1, y1, x2, y2, color);
@@ -641,13 +675,13 @@ void OLED_Image( const uint8_t *image)
  * @param radius: radius of the circle.
  * @param color: color parameter. Valid values: 0 and 1
  */
-void OLED_Circle( int8_t x0, int8_t y0, uint8_t r, uint8_t color )
+void OLED_Circle( int16_t x0, int16_t y0, int16_t r, uint8_t color )
 {
-  int8_t f = 1 - r;
-  int8_t ddF_x = 1;
-  int8_t ddF_y = -2 * r;
-  int8_t x = 0;
-  int8_t y = r;
+  int16_t f = 1 - r;
+  int16_t ddF_x = 1;
+  int16_t ddF_y = -2 * r;
+  int16_t x = 0;
+  int16_t y = r;
 
   OLED_DrawPixel(x0  , y0+r, color);
   OLED_DrawPixel(x0  , y0-r, color);
@@ -686,7 +720,7 @@ void OLED_Circle( int8_t x0, int8_t y0, uint8_t r, uint8_t color )
  * @param x: character starting position on x-axis. Valid values: 0..127
  * @param y: character starting position on x-axis. Valid values: 0..63
  */
-void OLED_Write( uint8_t x, uint8_t y, uint8_t value )
+void OLED_Write( int16_t x, int16_t y, char value )
 {
   uint16_t font_idx = 0;
   uint16_t rowcnt = 0;
@@ -769,7 +803,7 @@ void OLED_Write( uint8_t x, uint8_t y, uint8_t value )
  * @param x: character starting position on x-axis. Valid values: 0..127
  * @param y: character starting position on x-axis. Valid values: 0..63
  */
-void OLED_Write_Text(uint8_t x, uint8_t y, uint8_t *text)
+void OLED_Write_Text( int16_t x, int16_t y, char *text)
 {
   uint8_t cnt;
   uint8_t length;
@@ -784,6 +818,11 @@ void OLED_Write_Text(uint8_t x, uint8_t y, uint8_t *text)
     OLED_Write(x + (cnt*(cfont.x_size)), y, *text++ );
 }
 
+/**
+ * @brief Send Command to OLED Controller
+ *
+ * @param command: command to sent to Controller
+ */
 static void ssd1306_command( uint8_t command )
 {
   uint8_t control = 0x00;  // Co=0, D/C=0
@@ -794,6 +833,11 @@ static void ssd1306_command( uint8_t command )
   I2C_Stop();
 }
 
+/**
+ * @brief Send Data to OLED Controller
+ *
+ * @param value: Send Data to OLED Controller
+ */
 static void ssd1306_data( uint8_t value )
 {
   uint8_t control = 0x40;   // Co = 0, D/C = 1
@@ -804,16 +848,34 @@ static void ssd1306_data( uint8_t value )
   I2C_Stop();
 }
 
+/**
+ * @brief OLED Width
+ *
+ * @return Width
+ */
 static uint8_t width( void )
 {
   return SSD1306_LCDWIDTH;
 }
 
+/**
+ * @brief OLED Height
+ *
+ * @return Height
+ */
 static uint8_t height( void )
 {
   return SSD1306_LCDHEIGHT;
 }
 
+/**
+ * @brief Swap Number
+ * 
+ * Swap Number using call by reference method
+ *
+ * @param *a: First Number
+ * @param *b: Second Number
+ */
 static void swap_num( uint16_t *a, uint16_t *b )
 {
   uint16_t temp = *a;
