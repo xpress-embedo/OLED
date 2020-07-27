@@ -20,6 +20,7 @@ extern "C"
 
 extern const uint8_t SMALL_FONTS[];
 extern const uint8_t TINY_FONTS[];
+extern const uint8_t BIG_FONTS[];
 
 typedef struct _Current_Font_s
 {
